@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block title %}Password Vault — SecureVault{% endblock %}
+{% block page_title %}Password Vault{% endblock %}
+
+{% block content %}
+
+<!-- VAULT HEADER — SEARCH + ADD BUTTON        -->
+
+<div class="vault-header">
+  <div class="vault-header-left">
+    <form method="GET" action="{{ url_for('vault') }}" class="search-form">
+      <div class="search-wrapper">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" name="search" class="search-input"
+               placeholder="Search by website or username..."
+               value="{{ search_query }}"/>
+        {% if search_query %}
+        <a href="{{ url_for('vault') }}" class="search-clear">
+          <i class="bi bi-x-circle-fill"></i>
+        </a>
+        {% endif %}
+        <button type="submit" class="search-btn">Search</button>
+      </div>
+    </form>
+  </div>
+  <a href="{{ url_for('add_password') }}" class="btn-primary-custom btn-sm">
+    <i class="bi bi-plus-circle-fill"></i> Add New
+  </a>
+</div>
+
+<!-- Search Result Indicator -->
+{% if search_query %}
+<div class="search-result-info">
+  <i class="bi bi-funnel-fill"></i>
+  Showing results for "<strong>{{ search_query }}</strong>" — {{ credentials|length }} found
+</div>
+{% endif %}
+
+<!-- CREDENTIALS TABLE                         -->
+{% if credentials %}
+<div class="vault-table-card">
+  <div class="table-header-row">
+    <span class="table-count">
+      <i class="bi bi-database-fill-lock"></i>
+      {{ credentials|length }} credential{% if credentials|length != 1 %}s{% endif %} stored
+    </span>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th width="50"><i class="bi bi-hash"></i> ID</th>
+        <th><i class="bi bi-globe2"></i> Website</th>
+        <th><i class="bi bi-person-fill"></i> Username / Email</th>
+        <th><i class="bi bi-key-fill"></i> Password</th>
+        <th width="160"><i class="bi bi-gear-fill"></i> Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cred in credentials %}
+      <tr class="table-row" id="row-{{ cred.id }}">
+
+        <!-- ID -->
+        <td><span class="id-badge">#{{ cred.id }}</span></td>
+
+        <!-- Website with favicon letter -->
+        <td>
+          <div class="site-cell">
+            <div class="site-favicon">{{ cred.website[0].upper() }}</div>
+            <span>{{ cred.website }}</span>
+          </div>
+        </td>
+
+        <!-- Username -->
+        <td>
+          <span class="username-text">{{ cred.username }}</span>
+          <button class="btn-copy-inline" onclick="copyText('{{ cred.username }}', this)" title="Copy username">
+            <i class="bi bi-clipboard"></i>
+          </button>
+        </td>
+
+        <!-- Password — hidden by default, show/hide toggle -->
+        <td>
+          <div class="password-cell">
+            <span class="password-dots" id="pwd-{{ cred.id }}">••••••••••••</span>
+            <span class="password-plain hidden" id="pwdPlain-{{ cred.id }}">{{ cred.password }}</span>
+            <div class="pwd-actions">
+              <button class="btn-icon" onclick="toggleVaultPassword({{ cred.id }})" title="Show/Hide password">
+                <i class="bi bi-eye" id="eyeVault-{{ cred.id }}"></i>
+              </button>
+              <button class="btn-icon" onclick="copyPassword({{ cred.id }})" title="Copy password">
+                <i class="bi bi-clipboard" id="copyIcon-{{ cred.id }}"></i>
+              </button>
+            </div>
+          </div>
+        </td>
+
+        <!-- Action Buttons -->
+        <td>
+          <div class="action-btns">
+            <a href="{{ url_for('update_password', cred_id=cred.id) }}"
+               class="btn-action btn-edit" title="Edit credential">
+              <i class="bi bi-pencil-fill"></i> Edit
+            </a>
+            <form method="POST" action="{{ url_for('delete_password', cred_id=cred.id) }}"
+                  onsubmit="return confirmDelete('{{ cred.website }}')">
+              <button type="submit" class="btn-action btn-delete" title="Delete credential">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </form>
+          </div>
+        </td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<!-- ── Empty State ── -->
+<div class="empty-state">
+  {% if search_query %}
+    <i class="bi bi-search"></i>
+    <h3>No results found</h3>
+    <p>No credentials match "<strong>{{ search_query }}</strong>". Try a different search term.</p>
+    <a href="{{ url_for('vault') }}" class="btn-primary-custom" style="display:inline-flex; margin-top:1rem;">
+      <i class="bi bi-x-circle"></i> Clear Search
+    </a>
+  {% else %}
+    <i class="bi bi-safe2"></i>
+    <h3>Vault is empty</h3>
+    <p>Your secure vault has no credentials yet. Start adding passwords!</p>
+    <a href="{{ url_for('add_password') }}" class="btn-primary-custom" style="display:inline-flex; margin-top:1rem;">
+      <i class="bi bi-plus-circle"></i> Add First Password
+    </a>
+  {% endif %}
+</div>
+{% endif %}
+<!-- COPY SUCCESS POPUP (small overlay)        -->
+<div class="copy-popup" id="copyPopup">
+  <i class="bi bi-clipboard-check-fill"></i>
+  Copied to clipboard!
+</div>
+
+{% endblock %}

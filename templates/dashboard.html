@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — SecureVault{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════════════ -->
+<!-- WELCOME BANNER                            -->
+<!-- ══════════════════════════════════════════ -->
+<div class="welcome-banner">
+  <div class="welcome-text">
+    <h2>Vault Status: <span class="text-green">SECURE</span></h2>
+    <p>All your credentials are encrypted and safely stored.</p>
+  </div>
+  <div class="welcome-icon">
+    <i class="bi bi-shield-fill-check"></i>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- STATS CARDS ROW                           -->
+<!-- ══════════════════════════════════════════ -->
+<div class="stats-grid">
+
+  <div class="stat-card stat-card-blue">
+    <div class="stat-icon"><i class="bi bi-key-fill"></i></div>
+    <div class="stat-info">
+      <span class="stat-number">{{ total }}</span>
+      <span class="stat-label">Saved Passwords</span>
+    </div>
+  </div>
+
+  <div class="stat-card stat-card-green">
+    <div class="stat-icon"><i class="bi bi-shield-lock-fill"></i></div>
+    <div class="stat-info">
+      <span class="stat-number">AES-256</span>
+      <span class="stat-label">Encryption Level</span>
+    </div>
+  </div>
+
+  <div class="stat-card stat-card-cyan">
+    <div class="stat-icon"><i class="bi bi-database-fill-lock"></i></div>
+    <div class="stat-info">
+      <span class="stat-number">SQLite</span>
+      <span class="stat-label">Local Database</span>
+    </div>
+  </div>
+
+  <div class="stat-card stat-card-purple">
+    <div class="stat-icon"><i class="bi bi-fingerprint"></i></div>
+    <div class="stat-info">
+      <span class="stat-number">bcrypt</span>
+      <span class="stat-label">Master Hash</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- QUICK ACTIONS                             -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section-title">
+  <i class="bi bi-lightning-fill"></i> Quick Actions
+</div>
+
+<div class="quick-actions">
+  <a href="{{ url_for('add_password') }}" class="action-card action-add">
+    <i class="bi bi-plus-circle-fill"></i>
+    <span>Add New Password</span>
+    <small>Save a new credential</small>
+  </a>
+  <a href="{{ url_for('vault') }}" class="action-card action-vault">
+    <i class="bi bi-safe2-fill"></i>
+    <span>Open Vault</span>
+    <small>View all credentials</small>
+  </a>
+  <a href="{{ url_for('vault') }}?search=" class="action-card action-search">
+    <i class="bi bi-search"></i>
+    <span>Search Vault</span>
+    <small>Find a credential</small>
+  </a>
+  <a href="{{ url_for('logout') }}" class="action-card action-lock">
+    <i class="bi bi-lock-fill"></i>
+    <span>Lock Vault</span>
+    <small>Secure & logout</small>
+  </a>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- RECENT CREDENTIALS                        -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section-title">
+  <i class="bi bi-clock-history"></i> Recently Added
+</div>
+
+{% if recent %}
+<div class="recent-table-card">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th><i class="bi bi-hash"></i> ID</th>
+        <th><i class="bi bi-globe"></i> Website</th>
+        <th><i class="bi bi-person-fill"></i> Username</th>
+        <th><i class="bi bi-gear-fill"></i> Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in recent %}
+      <tr>
+        <td><span class="id-badge">#{{ item[0] }}</span></td>
+        <td>
+          <div class="site-cell">
+            <div class="site-favicon">{{ item[1][0].upper() }}</div>
+            {{ item[1] }}
+          </div>
+        </td>
+        <td><span class="username-text">{{ item[2] }}</span></td>
+        <td>
+          <div class="action-btns">
+            <a href="{{ url_for('update_password', cred_id=item[0]) }}" class="btn-action btn-edit" title="Edit">
+              <i class="bi bi-pencil-fill"></i>
+            </a>
+            <form method="POST" action="{{ url_for('delete_password', cred_id=item[0]) }}"
+                  onsubmit="return confirmDelete()">
+              <button type="submit" class="btn-action btn-delete" title="Delete">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="table-footer">
+    <a href="{{ url_for('vault') }}" class="view-all-link">
+      View all {{ total }} credentials <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+</div>
+{% else %}
+<div class="empty-state">
+  <i class="bi bi-inbox"></i>
+  <h3>No passwords yet</h3>
+  <p>Start building your secure vault by adding your first credential.</p>
+  <a href="{{ url_for('add_password') }}" class="btn-primary-custom" style="display:inline-flex; margin-top:1rem;">
+    <i class="bi bi-plus-circle"></i> Add First Password
+  </a>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% block title %}SecureVault — Login{% endblock %}
+
+{% block content %}
+<div class="login-page">
+
+  <!-- Animated background grid -->
+  <div class="login-bg">
+    <div class="grid-overlay"></div>
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+  </div>
+
+  <!-- Login Card -->
+  <div class="login-container">
+
+    <!-- Brand Header -->
+    <div class="login-brand">
+      <div class="login-icon">
+        <i class="bi bi-shield-lock-fill"></i>
+      </div>
+      <h1 class="login-title">SecureVault</h1>
+      <p class="login-subtitle">Military-grade password protection</p>
+    </div>
+
+    <!-- Status Badge -->
+    <div class="vault-status">
+      <i class="bi bi-lock-fill"></i>
+      <span>{% if master_exists %}VAULT LOCKED — AUTHENTICATE{% else %}FIRST TIME SETUP{% endif %}</span>
+    </div>
+
+    <!-- ─── FIRST TIME: Create Master Password ─── -->
+    {% if not master_exists %}
+    <div class="login-card">
+      <div class="card-header-text">
+        <h2>Create Master Password</h2>
+        <p>This password encrypts your entire vault. Choose wisely — it cannot be recovered.</p>
+      </div>
+
+      <form method="POST" action="/" id="setupForm">
+        <input type="hidden" name="action" value="create"/>
+
+        <div class="input-group-custom">
+          <label class="input-label">
+            <i class="bi bi-key-fill"></i> Master Password
+          </label>
+          <div class="input-wrapper">
+            <input type="password" name="master_password" id="masterPasswordInput"
+                   class="input-field" placeholder="Create a strong master password"
+                   required minlength="8" oninput="checkPasswordStrength(this.value)"/>
+            <button type="button" class="toggle-eye" onclick="togglePassword('masterPasswordInput')">
+              <i class="bi bi-eye" id="eyeIcon_masterPasswordInput"></i>
+            </button>
+          </div>
+          <!-- Password Strength Meter -->
+          <div class="strength-meter">
+            <div class="strength-bar">
+              <div class="strength-fill" id="strengthFill"></div>
+            </div>
+            <span class="strength-label" id="strengthLabel">Enter password</span>
+          </div>
+        </div>
+
+        <div class="input-group-custom">
+          <label class="input-label">
+            <i class="bi bi-key-fill"></i> Confirm Password
+          </label>
+          <div class="input-wrapper">
+            <input type="password" name="confirm_password" id="confirmPasswordInput"
+                   class="input-field" placeholder="Confirm your master password"
+                   required oninput="checkMatch()"/>
+            <button type="button" class="toggle-eye" onclick="togglePassword('confirmPasswordInput')">
+              <i class="bi bi-eye" id="eyeIcon_confirmPasswordInput"></i>
+            </button>
+          </div>
+          <span class="match-status" id="matchStatus"></span>
+        </div>
+
+        <!-- Password Tips -->
+        <div class="password-tips">
+          <span class="tip-title"><i class="bi bi-info-circle"></i> Tips for a strong master password:</span>
+          <ul>
+            <li>At least 12 characters long</li>
+            <li>Mix uppercase, lowercase, numbers, symbols</li>
+            <li>Never use this password anywhere else</li>
+          </ul>
+        </div>
+
+        <button type="submit" class="btn-primary-custom" id="submitBtn">
+          <i class="bi bi-shield-check"></i>
+          Create Vault
+        </button>
+      </form>
+    </div>
+
+    <!-- ─── RETURNING USER: Login ─── -->
+    {% else %}
+    <div class="login-card">
+      <div class="card-header-text">
+        <h2>Unlock Your Vault</h2>
+        <p>Enter your master password to access your saved credentials.</p>
+      </div>
+
+      <form method="POST" action="/">
+        <input type="hidden" name="action" value="login"/>
+
+        <div class="input-group-custom">
+          <label class="input-label">
+            <i class="bi bi-key-fill"></i> Master Password
+          </label>
+          <div class="input-wrapper">
+            <input type="password" name="master_password" id="loginPasswordInput"
+                   class="input-field" placeholder="Enter your master password"
+                   required autofocus/>
+            <button type="button" class="toggle-eye" onclick="togglePassword('loginPasswordInput')">
+              <i class="bi bi-eye" id="eyeIcon_loginPasswordInput"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary-custom">
+          <i class="bi bi-unlock-fill"></i>
+          Unlock Vault
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- Footer Note -->
+    <p class="login-footer">
+      <i class="bi bi-shield-fill-check"></i>
+      Passwords encrypted with AES-256 Fernet • Master password hashed with bcrypt
+    </p>
+
+  </div>
+</div>
+{% endblock %}
