@@ -1,5 +1,9 @@
 # SecureVault – Encrypted Password Manager
 
+Developer:
+Chaitanya Kewale
+INTERN ID - CITS1513
+
 SecureVault is a web-based password management system developed using Python and Flask.
 The application allows users to securely store, manage, update, and retrieve credentials using encryption techniques.
 
